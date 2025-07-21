@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blockchain 3D Cube - Interactive Circuit Network</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@300;400;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            font-family: 'Orbitron', monospace;
+            overflow-x: hidden;
+            color: #00ffff;
+        }
+
+        /* Header Section */
+        .header {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .title {
+            font-size: 4rem;
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            font-weight: 300;
+            text-align: center;
+            opacity: 0.8;
+            margin-bottom: 2rem;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff; }
+            to { text-shadow: 0 0 30px #00ffff, 0 0 60px #00ffff, 0 0 80px #00ffff; }
+        }
+
+        /* Three.js Canvas Container */
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* Content Sections */
+        .content-section {
+            min-height: 100vh;
+            padding: 5rem 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+            margin: 2rem 0;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .section-title {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            text-align: center;
+            color: #00ffff;
+        }
+
+        .section-content {
+            max-width: 800px;
+            text-align: center;
+            font-size: 1.2rem;
+            line-height: 1.8;
+            opacity: 0.9;
+        }
+
+        /* Blockchain Network Visualization */
+        .blockchain-network {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        .block {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, #00ffff, #0080ff);
+            border: 2px solid #00ffff;
+            border-radius: 4px;
+            box-shadow: 0 0 10px #00ffff;
+            animation: blockPulse 3s ease-in-out infinite;
+        }
+
+        .connection {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ffff, transparent);
+            box-shadow: 0 0 5px #00ffff;
+            animation: dataFlow 2s linear infinite;
+        }
+
+        @keyframes blockPulse {
+            0%, 100% { transform: scale(1); opacity: 0.6; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+
+        @keyframes dataFlow {
+            0% { opacity: 0; transform: scaleX(0); }
+            50% { opacity: 1; transform: scaleX(1); }
+            100% { opacity: 0; transform: scaleX(0); }
+        }
+
+        /* Scroll indicator */
+        .scroll-indicator {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            color: #00ffff;
+            font-size: 1rem;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+            40% { transform: translateX(-50%) translateY(-10px); }
+            60% { transform: translateX(-50%) translateY(-5px); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .title { font-size: 2.5rem; }
+            .subtitle { font-size: 1.2rem; }
+            .section-title { font-size: 2rem; }
+            .section-content { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Section -->
+    <div class="header">
+        <h1 class="title">BLOCKCHAIN CUBE</h1>
+        <p class="subtitle">Interactive 3D Network Visualization</p>
+        <div class="scroll-indicator">↓ Scroll to explore ↓</div>
+    </div>
+
+    <!-- Three.js Canvas Container -->
+    <div id="canvas-container"></div>
+
+    <!-- Blockchain Network Background -->
+    <div class="blockchain-network" id="blockchain-network"></div>
+
+    <!-- Content Sections -->
+    <div class="content-section" id="section1">
+        <h2 class="section-title">Decentralized Network</h2>
+        <div class="section-content">
+            <p>Experience the power of blockchain technology through this interactive 3D visualization. Each block represents a node in the decentralized network, connected through cryptographic circuits that ensure security and transparency.</p>
+        </div>
+    </div>
+
+    <div class="content-section" id="section2">
+        <h2 class="section-title">Smart Contracts</h2>
+        <div class="section-content">
+            <p>Watch as the central cube transforms and evolves, representing the dynamic nature of smart contracts executing on the blockchain. The glowing connections show real-time data flow between network participants.</p>
+        </div>
+    </div>
+
+    <div class="content-section" id="section3">
+        <h2 class="section-title">Consensus Mechanism</h2>
+        <div class="section-content">
+            <p>The rotating cube demonstrates the consensus mechanism at work, where all network participants agree on the state of the blockchain. The pulsing blocks show the validation process in action.</p>
+        </div>
+    </div>
+
+    <div class="content-section" id="section4">
+        <h2 class="section-title">Future of Finance</h2>
+        <div class="section-content">
+            <p>This visualization represents the future of decentralized finance, where traditional intermediaries are replaced by transparent, automated systems that operate on mathematical principles rather than trust.</p>
+        </div>
+    </div>
+
+    <!-- Three.js and Anime.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+
+    <script>
+        // Three.js Scene Setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setClearColor(0x000000, 0);
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+        // Lighting Setup
+        const ambientLight = new THREE.AmbientLight(0x404040, 0.3);
+        scene.add(ambientLight);
+
+        const directionalLight = new THREE.DirectionalLight(0x00ffff, 1);
+        directionalLight.position.set(5, 5, 5);
+        scene.add(directionalLight);
+
+        const pointLight1 = new THREE.PointLight(0x00ffff, 1, 100);
+        pointLight1.position.set(10, 10, 10);
+        scene.add(pointLight1);
+
+        const pointLight2 = new THREE.PointLight(0x0080ff, 0.8, 100);
+        pointLight2.position.set(-10, -10, 10);
+        scene.add(pointLight2);
+
+        // Main Blockchain Cube (Large Central Cube)
+        const cubeGeometry = new THREE.BoxGeometry(3, 3, 3);
+        const cubeMaterial = new THREE.MeshPhongMaterial({
+            color: 0x00ffff,
+            emissive: 0x003333,
+            transparent: true,
+            opacity: 0.8,
+            shininess: 100
+        });
+        const mainCube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+        scene.add(mainCube);
+
+        // Wireframe for the main cube
+        const wireframeGeometry = new THREE.EdgesGeometry(cubeGeometry);
+        const wireframeMaterial = new THREE.LineBasicMaterial({ color: 0x00ffff, linewidth: 2 });
+        const wireframe = new THREE.LineSegments(wireframeGeometry, wireframeMaterial);
+        mainCube.add(wireframe);
+
+        // Smaller Network Blocks
+        const networkBlocks = [];
+        const blockGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+        const blockMaterial = new THREE.MeshPhongMaterial({
+            color: 0x0080ff,
+            emissive: 0x001133,
+            transparent: true,
+            opacity: 0.7
+        });
+
+        // Create network of smaller blocks
+        for (let i = 0; i < 20; i++) {
+            const block = new THREE.Mesh(blockGeometry, blockMaterial.clone());
+            
+            // Position blocks in a sphere around the main cube
+            const radius = 8 + Math.random() * 5;
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.random() * Math.PI;
+            
+            block.position.x = radius * Math.sin(phi) * Math.cos(theta);
+            block.position.y = radius * Math.sin(phi) * Math.sin(theta);
+            block.position.z = radius * Math.cos(phi);
+            
+            // Add wireframe to each block
+            const blockWireframe = new THREE.LineSegments(
+                new THREE.EdgesGeometry(blockGeometry),
+                new THREE.LineBasicMaterial({ color: 0x0080ff })
+            );
+            block.add(blockWireframe);
+            
+            scene.add(block);
+            networkBlocks.push(block);
+        }
+
+        // Connection Lines (Circuit-like connections)
+        const connections = [];
+        const lineMaterial = new THREE.LineBasicMaterial({ 
+            color: 0x00ffff, 
+            transparent: true, 
+            opacity: 0.6 
+        });
+
+        networkBlocks.forEach((block, index) => {
+            if (index < networkBlocks.length - 1) {
+                const points = [];
+                points.push(block.position);
+                points.push(networkBlocks[index + 1].position);
+                
+                const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
+                const line = new THREE.Line(lineGeometry, lineMaterial);
+                scene.add(line);
+                connections.push(line);
+            }
+            
+            // Connect some blocks to the main cube
+            if (Math.random() > 0.7) {
+                const points = [];
+                points.push(block.position);
+                points.push(new THREE.Vector3(0, 0, 0));
+                
+                const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
+                const line = new THREE.Line(lineGeometry, lineMaterial);
+                scene.add(line);
+                connections.push(line);
+            }
+        });
+
+        // Camera positioning
+        camera.position.set(0, 0, 15);
+        camera.lookAt(0, 0, 0);
+
+        // Animation variables
+        let scrollY = 0;
+        let time = 0;
+
+        // Scroll event listener
+        window.addEventListener('scroll', () => {
+            scrollY = window.pageYOffset;
+            
+            // Calculate scroll progress (0 to 1)
+            const maxScroll = document.body.scrollHeight - window.innerHeight;
+            const scrollProgress = scrollY / maxScroll;
+            
+            // Animate main cube based on scroll
+            anime({
+                targets: mainCube.rotation,
+                x: scrollProgress * Math.PI * 4,
+                y: scrollProgress * Math.PI * 6,
+                z: scrollProgress * Math.PI * 2,
+                duration: 100,
+                easing: 'linear'
+            });
+            
+            // Animate cube scale
+            anime({
+                targets: mainCube.scale,
+                x: 1 + scrollProgress * 0.5,
+                y: 1 + scrollProgress * 0.5,
+                z: 1 + scrollProgress * 0.5,
+                duration: 100,
+                easing: 'easeOutQuad'
+            });
+            
+            // Animate camera position
+            anime({
+                targets: camera.position,
+                x: Math.sin(scrollProgress * Math.PI * 2) * 5,
+                y: Math.cos(scrollProgress * Math.PI * 2) * 3,
+                z: 15 - scrollProgress * 5,
+                duration: 200,
+                easing: 'easeOutQuad'
+            });
+        });
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 0.01;
+            
+            // Continuous rotation for main cube
+            mainCube.rotation.x += 0.005;
+            mainCube.rotation.y += 0.008;
+            
+            // Animate network blocks
+            networkBlocks.forEach((block, index) => {
+                block.rotation.x += 0.01 + index * 0.001;
+                block.rotation.y += 0.008 + index * 0.001;
+                
+                // Pulsing effect
+                const pulse = Math.sin(time + index) * 0.1 + 1;
+                block.scale.setScalar(pulse);
+                
+                // Color animation
+                const hue = (time + index * 0.1) % 1;
+                block.material.emissive.setHSL(0.5 + hue * 0.1, 1, 0.1);
+            });
+            
+            // Animate lights
+            pointLight1.position.x = Math.sin(time) * 10;
+            pointLight1.position.z = Math.cos(time) * 10;
+            
+            pointLight2.position.x = Math.cos(time * 0.7) * 8;
+            pointLight2.position.y = Math.sin(time * 0.7) * 8;
+            
+            // Update camera look at
+            camera.lookAt(0, 0, 0);
+            
+            renderer.render(scene, camera);
+        }
+
+        // Start animation
+        animate();
+
+        // Resize handler
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Create blockchain network background
+        function createBlockchainNetwork() {
+            const container = document.getElementById('blockchain-network');
+            const blockCount = 50;
+            
+            for (let i = 0; i < blockCount; i++) {
+                const block = document.createElement('div');
+                block.className = 'block';
+                block.style.left = Math.random() * 100 + '%';
+                block.style.top = Math.random() * 100 + '%';
+                block.style.animationDelay = Math.random() * 3 + 's';
+                container.appendChild(block);
+                
+                // Create connections
+                if (i > 0 && Math.random() > 0.6) {
+                    const connection = document.createElement('div');
+                    connection.className = 'connection';
+                    connection.style.left = Math.random() * 100 + '%';
+                    connection.style.top = Math.random() * 100 + '%';
+                    connection.style.width = Math.random() * 200 + 50 + 'px';
+                    connection.style.transform = 'rotate(' + Math.random() * 360 + 'deg)';
+                    connection.style.animationDelay = Math.random() * 2 + 's';
+                    container.appendChild(connection);
+                }
+            }
+        }
+
+        // Initialize blockchain network
+        createBlockchainNetwork();
+
+        // Scroll-triggered animations for content sections
+        const sections = document.querySelectorAll('.content-section');
+        
+        const observerOptions = {
+            threshold: 0.3,
+            rootMargin: '0px 0px -100px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    anime({
+                        targets: entry.target,
+                        opacity: [0, 1],
+                        translateY: [50, 0],
+                        duration: 1000,
+                        easing: 'easeOutQuad'
+                    });
+                }
+            });
+        }, observerOptions);
+        
+        sections.forEach(section => {
+            section.style.opacity = '0';
+            observer.observe(section);
+        });
+    </script>
+</body>
+</html>
